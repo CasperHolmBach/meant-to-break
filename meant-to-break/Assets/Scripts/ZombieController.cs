@@ -7,11 +7,6 @@ public class ZombieController : MonoBehaviour
 {
     public NavMeshAgent agent;
     public Vector3 destination;
-    
-    void Start()
-    {
-        
-    }
 
     // Update is called once per frame
     void Update()
