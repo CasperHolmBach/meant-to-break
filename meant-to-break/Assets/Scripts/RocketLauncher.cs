@@ -3,22 +3,35 @@ using UnityEngine;
 public class RocketLauncher : MonoBehaviour
 {
     public GameObject rocketPrefab;
-    public Transform firePoint;
-    public float fireRate = 1f;
-
-    private float nextFireTime = 0f;
+    public Camera playerCamera;
+    public float fireDistance = 100f;
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0) && Time.time >= nextFireTime)
+        if (Input.GetMouseButtonDown(0)) 
         {
             Shoot();
-            nextFireTime = Time.time + 1f / fireRate;
         }
     }
 
     void Shoot()
     {
-        Instantiate(rocketPrefab, firePoint.position, firePoint.rotation);
+        Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
+        RaycastHit hit;
+
+        Vector3 targetPoint;
+
+        if (Physics.Raycast(ray, out hit, fireDistance))
+        {
+            targetPoint = hit.point; 
+        }
+        else
+        {
+            targetPoint = ray.origin + ray.direction * fireDistance; 
+        }
+
+        GameObject rocket = Instantiate(rocketPrefab, playerCamera.transform.position + playerCamera.transform.forward * 1.5f, Quaternion.identity);
+
+        rocket.transform.LookAt(targetPoint);
     }
 }

@@ -3,7 +3,7 @@ using UnityEngine;
 public class Rocket : MonoBehaviour
 {
     public float speed = 20f;
-    public GameObject explosionEffect;
+    public ParticleSystem explosionEffect;
     
     private Rigidbody rb;
 
@@ -20,9 +20,12 @@ public class Rocket : MonoBehaviour
 
     void Explode()
     {
-        // Spawn explosion effect
-        if (explosionEffect)
-            Instantiate(explosionEffect, transform.position, Quaternion.identity);
+        if (explosionEffect != null)
+        {
+            ParticleSystem explosion = Instantiate(explosionEffect, transform.position, Quaternion.identity);
+            explosion.Play();
+            Destroy(explosion.gameObject, explosion.main.duration);
+        }
 
         Destroy(gameObject);
     }
