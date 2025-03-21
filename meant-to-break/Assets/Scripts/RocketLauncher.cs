@@ -37,6 +37,6 @@ public class RocketLauncher : MonoBehaviour, IWeapon
 
     public void Mouse2()
     {
-        Console.WriteLine("Mouse 2: Rocket Launcher");
+        Debug.Log("Mouse 2: Rocket Launcher");
     }
 }

@@ -1,17 +1,19 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
     [SerializeField] private Transform weaponParent;
+    [SerializeField] private Transform weaponUIParent;
     [SerializeField] private GameObject inventoryUI;
+    [SerializeField] private GameObject weaponUIElementPrefab;
 
     private List<IWeapon> weapons = new List<IWeapon>();
     private int currentWeaponIndex = -1;
 
-    // Event for UI to subscribe to
-    public delegate void OnWeaponChanged();
-    public event OnInventoryChanged onInventoryChanged;
+    public delegate void OnWeaponChangedHandler();
+    public event OnWeaponChangedHandler onWeaponChanged;
 
     private void Start()
     {
@@ -45,22 +47,30 @@ public class Inventory : MonoBehaviour
             }
         }
     }
+
     public void AddWeapon(IWeapon weapon)
     {
         if (!weapons.Contains(weapon))
         {
             weapons.Add(weapon);
             
-            // If this is our first weapon, select it
             if (weapons.Count == 1)
             {
                 SelectWeapon(0);
             }
             
             UpdateUI();
-            onInventoryChanged?.Invoke();
+            onWeaponChanged?.Invoke();
         }
     }
+    public void SelectWeaponByInstance(IWeapon weapon)
+{
+    int index = weapons.IndexOf(weapon);
+    if (index >= 0)
+    {
+        SelectWeapon(index);
+    }
+}
 
     public void RemoveWeapon(IWeapon weapon)
     {
@@ -86,27 +96,11 @@ public class Inventory : MonoBehaviour
             }
             
             UpdateUI();
-            onInventoryChanged?.Invoke();
+            onWeaponChanged?.Invoke();
         }
     }
 
-    public void AddWeapon(IWeapon weapon)
-    {
-        if (!weapons.Contains(weapon))
-        {
-            weapons.Add(weapon);
-            
-            if (weapons.Count == 1)
-            {
-                SelectWeapon(0);
-            }
-            
-            UpdateUI();
-            onInventoryChanged?.Invoke();
-        }
-    }
-
-     public IWeapon GetCurrentWeapon()
+    public IWeapon GetCurrentWeapon()
     {
         if (currentWeaponIndex >= 0 && currentWeaponIndex < weapons.Count)
         {
@@ -131,6 +125,7 @@ public class Inventory : MonoBehaviour
             UpdateUI();
         }
     }
+
     public void SelectNextWeapon()
     {
         if (weapons.Count > 0)
@@ -139,12 +134,59 @@ public class Inventory : MonoBehaviour
             SelectWeapon(nextIndex);
         }
     }
-        public void SelectPreviousWeapon()
+
+    public void SelectPreviousWeapon()
     {
         if (weapons.Count > 0)
         {
             int prevIndex = (currentWeaponIndex - 1 + weapons.Count) % weapons.Count;
             SelectWeapon(prevIndex);
         }
+    }
+
+    private void EnableWeapon(IWeapon weapon)
+    {
+        MonoBehaviour weaponMono = weapon as MonoBehaviour;
+        if (weaponMono != null)
+        {
+            weaponMono.gameObject.SetActive(true);
+        }
+    }
+
+    private void DisableWeapon(IWeapon weapon)
+    {
+        MonoBehaviour weaponMono = weapon as MonoBehaviour;
+        if (weaponMono != null)
+        {
+            weaponMono.gameObject.SetActive(false);
+        }
+    }
+
+    private void UpdateUI()
+    {
+        if (weaponUIParent != null)
+        {
+            foreach (Transform child in weaponUIParent)
+            {
+                Destroy(child.gameObject);
+            }
+            
+            for (int i = 0; i < weapons.Count; i++)
+            {
+                GameObject uiElement = Instantiate(weaponUIElementPrefab, weaponUIParent);
+                WeaponUIElement element = uiElement.GetComponent<WeaponUIElement>();
+                
+                if (element != null)
+                {
+                    element.SetWeapon(weapons[i], i == currentWeaponIndex);
+                }
+            }
+        }
+    }
+
+    public void PickUpWeapon(IWeapon weapon)
+    {
+        AddWeapon(weapon);
+        Debug.Log($"Picked up: {weapon.GetType().Name}");
     }
 }
