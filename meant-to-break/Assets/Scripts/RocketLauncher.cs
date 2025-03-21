@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class RocketLauncher : MonoBehaviour
+public class RocketLauncher : MonoBehaviour, IWeapon
 {
     public GameObject rocketPrefab;
     [SerializeField] private Camera playerCamera;
@@ -10,11 +10,11 @@ public class RocketLauncher : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0)) 
         {
-            Shoot();
+            Mouse1();
         }
     }
 
-    void Shoot()
+    public void Mouse1()
     {
         Ray ray = playerCamera.ScreenPointToRay(new Vector3(Screen.width / 2, Screen.height / 2, 0));
         RaycastHit hit;
@@ -33,5 +33,10 @@ public class RocketLauncher : MonoBehaviour
         GameObject rocket = Instantiate(rocketPrefab, playerCamera.transform.position + playerCamera.transform.forward * 1.5f, Quaternion.identity);
 
         rocket.transform.LookAt(targetPoint);
+    }
+
+    public void Mouse2()
+    {
+        Console.WriteLine("Mouse 2: Rocket Launcher");
     }
 }
