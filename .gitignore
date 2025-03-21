@@ -76,3 +76,31 @@ crashlytics-build.properties
 
 # End of https://www.toptal.com/developers/gitignore/api/unity
 .DS_STORE
+
+# Unity Collaborate (hvis du bruger det – de fleste gør ikke)
+.collabignore
+.Collab/
+
+# Rider specifikke caches (udover JetBrains plugin)
+.idea/
+
+# VS Code settings og workspace filer
+.vscode/
+*.code-workspace
+
+# Unity Analytics og crash logs
+*.log
+analytics.db
+
+# Unity Cloud Build
+/[Uu]nity[Cc]loud[Bb]uild/
+
+# Thumbnails og OS metadata
+[Tt]humbnails/
+.DS_Store
+ehthumbs.db
+Thumbs.db
+
+# Unity meta-filer for skraldede filer (sjældent, men sker)
+*.deleted.meta
+
