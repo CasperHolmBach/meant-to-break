@@ -27,6 +27,21 @@ public class Rocket : MonoBehaviour
             Destroy(explosion.gameObject, explosion.main.duration);
         }
 
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (player != null)
+        {
+            CharacterController controller = player.GetComponent<CharacterController>();
+
+            if (controller != null)
+            {
+                Vector3 knockbackDir = (player.transform.position - transform.position).normalized;
+                float distance = Vector3.Distance(player.transform.position, transform.position);
+
+                float knockbackForce = Mathf.Clamp(50f / distance, 5f, 25f);
+                player.GetComponent<FPSController>().ApplyKnockback(knockbackDir * knockbackForce);
+            }
+        }
         Destroy(gameObject);
     }
 }

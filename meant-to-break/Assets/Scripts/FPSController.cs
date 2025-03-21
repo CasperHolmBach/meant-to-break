@@ -24,6 +24,10 @@ public class FPSController : MonoBehaviour
         Cursor.visible = false;
     }
 
+    public void ApplyKnockback(Vector3 force)
+    {
+        velocity = force;
+    }
     void Update()
     {
         MovePlayer();
