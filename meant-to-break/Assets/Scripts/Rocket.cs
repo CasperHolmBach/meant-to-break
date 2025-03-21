@@ -4,7 +4,10 @@ public class Rocket : MonoBehaviour
 {
     public float speed = 20f;
     public ParticleSystem explosionEffect;
-    
+
+    [Header("Knockback Settings")]
+    public float baseKnockbackForce = 50f;
+
     private Rigidbody rb;
 
     void Start()
@@ -38,7 +41,7 @@ public class Rocket : MonoBehaviour
                 Vector3 knockbackDir = (player.transform.position - transform.position).normalized;
                 float distance = Vector3.Distance(player.transform.position, transform.position);
 
-                float knockbackForce = Mathf.Clamp(50f / distance, 5f, 25f);
+                float knockbackForce = baseKnockbackForce / distance;
                 player.GetComponent<FPSController>().ApplyKnockback(knockbackDir * knockbackForce);
             }
         }

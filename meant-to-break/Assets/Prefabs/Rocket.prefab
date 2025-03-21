@@ -146,5 +146,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e19b9e28d5db049af9ccfcea216e648d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  speed: 10
+  speed: 20
   explosionEffect: {fileID: 417761080263594739, guid: 3ff01ca0770b549d4bb2ec8c172d1cfe, type: 3}
+  baseKnockbackForce: 35

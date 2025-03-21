@@ -3,7 +3,7 @@ using UnityEngine;
 public class RocketLauncher : MonoBehaviour
 {
     public GameObject rocketPrefab;
-    public Camera playerCamera;
+    [SerializeField] private Camera playerCamera;
     public float fireDistance = 100f;
 
     void Update()

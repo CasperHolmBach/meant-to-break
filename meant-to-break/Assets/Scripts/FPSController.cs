@@ -7,11 +7,15 @@ public class FPSController : MonoBehaviour
     public float gravity = -9.81f;
     public float jumpHeight = 1.5f;
     public float mouseSensitivity = 100f;
+    
+    [Header("Knockback Settings")]
+    public float knockbackDecay = 5f; 
 
     public Transform cameraTransform;
 
     private CharacterController controller;
     private Vector3 velocity;
+    private Vector3 knockbackVelocity;
     private bool isGrounded;
     private float xRotation = 0f;
 
@@ -26,8 +30,9 @@ public class FPSController : MonoBehaviour
 
     public void ApplyKnockback(Vector3 force)
     {
-        velocity = force;
+        knockbackVelocity = force;
     }
+
     void Update()
     {
         MovePlayer();
@@ -51,6 +56,13 @@ public class FPSController : MonoBehaviour
         // Jump
         if (Input.GetButtonDown("Jump") && isGrounded)
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
+
+        // Apply knockback and decay it over time
+        if (knockbackVelocity.magnitude > 0.01f)
+        {
+            controller.Move(knockbackVelocity * Time.deltaTime);
+            knockbackVelocity = Vector3.Lerp(knockbackVelocity, Vector3.zero, knockbackDecay * Time.deltaTime);
+        }
 
         // Gravity
         velocity.y += gravity * Time.deltaTime;

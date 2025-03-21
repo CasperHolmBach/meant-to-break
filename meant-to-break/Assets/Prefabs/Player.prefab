@@ -562,4 +562,5 @@ MonoBehaviour:
   gravity: -9.81
   jumpHeight: 1.5
   mouseSensitivity: 200
+  knockbackDecay: 3
   cameraTransform: {fileID: 4479318762881607338}
