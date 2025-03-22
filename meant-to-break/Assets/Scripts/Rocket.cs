@@ -7,6 +7,8 @@ public class Rocket : MonoBehaviour
 
     [Header("Knockback Settings")]
     public float baseKnockbackForce = 50f;
+    public float maxKnockbackDistance = 15f; // Maximum distance where knockback is applied
+    public float minKnockbackDistance = 1f; // Distance for maximum knockback
 
     private Rigidbody rb;
 
@@ -34,17 +36,33 @@ public class Rocket : MonoBehaviour
 
         if (player != null)
         {
-            CharacterController controller = player.GetComponent<CharacterController>();
-
-            if (controller != null)
+            float distance = Vector3.Distance(player.transform.position, transform.position);
+            
+            // Only apply knockback if player is within maxKnockbackDistance
+            if (distance <= maxKnockbackDistance)
             {
-                Vector3 knockbackDir = (player.transform.position - transform.position).normalized;
-                float distance = Vector3.Distance(player.transform.position, transform.position);
-
-                float knockbackForce = baseKnockbackForce / distance;
-                player.GetComponent<FPSController>().ApplyKnockback(knockbackDir * knockbackForce);
+                FPSController controller = player.GetComponent<FPSController>();
+                
+                if (controller != null)
+                {
+                    Vector3 knockbackDir = (player.transform.position - transform.position).normalized;
+                    
+                    // Calculate knockback force based on distance
+                    // Closer = stronger, further = weaker
+                    float distanceFactor = Mathf.Clamp01(1.0f - (distance - minKnockbackDistance) / (maxKnockbackDistance - minKnockbackDistance));
+                    float knockbackForce = baseKnockbackForce * distanceFactor;
+                    
+                    controller.ApplyKnockback(knockbackDir * knockbackForce);
+                    
+                    Debug.Log($"Applied rocket knockback to player. Distance: {distance:F1}m, Force: {knockbackForce:F1}");
+                }
+            }
+            else
+            {
+                Debug.Log($"Player too far for knockback ({distance:F1}m > {maxKnockbackDistance:F1}m)");
             }
         }
+        
         Destroy(gameObject);
     }
 }

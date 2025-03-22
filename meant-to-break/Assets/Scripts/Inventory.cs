@@ -1,192 +1,119 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
-using UnityEngine.UI;
 
 public class Inventory : MonoBehaviour
 {
-    [SerializeField] private Transform weaponParent;
-    [SerializeField] private Transform weaponUIParent;
+    [Header("Weapon References")]
+    [SerializeField] private GameObject katanaObject;  // Slot 0
+    [SerializeField] private GameObject glockObject;   // Slot 1
+    [SerializeField] private GameObject smgObject;     // Slot 2
+    [SerializeField] private GameObject rocketLauncherObject; // Slot 3
+    
     [SerializeField] private GameObject inventoryUI;
-    [SerializeField] private GameObject weaponUIElementPrefab;
-
-    private List<IWeapon> weapons = new List<IWeapon>();
-    private int currentWeaponIndex = -1;
-
-    public delegate void OnWeaponChangedHandler();
-    public event OnWeaponChangedHandler onWeaponChanged;
+    
+    private bool[] weaponUnlocked = new bool[4]; // Array to track unlocked weapons
+    private int activeWeaponIndex = -1; // Currently active weapon (-1 means no weapon active)
+    
+    // Optional event for UI updates
+    public event Action<int> OnWeaponChanged;
 
     private void Start()
     {
-        UpdateUI();
+        // Make sure all weapons are disabled at start
+        DisableAllWeapons();
     }
 
     private void Update()
     {
-        float scroll = Input.GetAxis("Mouse ScrollWheel");
+        // Check for number key presses to switch weapons
+        if (Input.GetKeyDown(KeyCode.Alpha1)) SwitchToWeapon(0);
+        else if (Input.GetKeyDown(KeyCode.Alpha2)) SwitchToWeapon(1);
+        else if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToWeapon(2);
+        else if (Input.GetKeyDown(KeyCode.Alpha4)) SwitchToWeapon(3);
         
-        if (scroll > 0f)
-        {
-            SelectNextWeapon();
-        }
-        else if (scroll < 0f)
-        {
-            SelectPreviousWeapon();
-        }
-
+        // Optional: Toggle inventory UI
         if (Input.GetKeyDown(KeyCode.Tab))
-        {
             inventoryUI.SetActive(!inventoryUI.activeSelf);
-        }
-
-        for (int i = 0; i < 9; i++)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha1 + i) && i < weapons.Count)
-            {
-                SelectWeapon(i);
-                break;
-            }
-        }
     }
 
-    public void AddWeapon(IWeapon weapon)
+    // Called from WeaponPickup when a weapon is picked up
+    public void UnlockWeapon(int slotIndex)
     {
-        if (!weapons.Contains(weapon))
+        if (slotIndex < 0 || slotIndex >= weaponUnlocked.Length)
         {
-            weapons.Add(weapon);
-            
-            if (weapons.Count == 1)
-            {
-                SelectWeapon(0);
-            }
-            
-            UpdateUI();
-            onWeaponChanged?.Invoke();
+            Debug.LogError("Invalid weapon slot: " + slotIndex);
+            return;
         }
-    }
-    public void SelectWeaponByInstance(IWeapon weapon)
-{
-    int index = weapons.IndexOf(weapon);
-    if (index >= 0)
-    {
-        SelectWeapon(index);
-    }
-}
-
-    public void RemoveWeapon(IWeapon weapon)
-    {
-        int index = weapons.IndexOf(weapon);
-        if (index >= 0)
+        
+        weaponUnlocked[slotIndex] = true;
+        Debug.Log($"Weapon in slot {slotIndex} unlocked!");
+        
+        // If this is our first weapon, automatically equip it
+        if (activeWeaponIndex == -1)
         {
-            weapons.RemoveAt(index);
+            SwitchToWeapon(slotIndex);
+        }
+        
+        // Notify any listeners (like UI elements)
+        OnWeaponChanged?.Invoke(activeWeaponIndex);
+    }
+    
+    public void SwitchToWeapon(int slotIndex)
+    {
+        // Check if the weapon is unlocked
+        if (slotIndex >= 0 && slotIndex < weaponUnlocked.Length && weaponUnlocked[slotIndex])
+        {
+            // First disable all weapons
+            DisableAllWeapons();
             
-            if (index == currentWeaponIndex)
+            // Then activate the requested weapon
+            switch (slotIndex)
             {
-                if (weapons.Count > 0)
-                {
-                    SelectWeapon(Mathf.Min(index, weapons.Count - 1));
-                }
-                else
-                {
-                    currentWeaponIndex = -1;
-                }
-            }
-            else if (index < currentWeaponIndex)
-            {
-                currentWeaponIndex--;
+                case 0: // Katana
+                    if (katanaObject != null) katanaObject.SetActive(true);
+                    break;
+                case 1: // Glock
+                    if (glockObject != null) glockObject.SetActive(true);
+                    break;
+                case 2: // SMG
+                    if (smgObject != null) smgObject.SetActive(true);
+                    break;
+                case 3: // Rocket Launcher
+                    if (rocketLauncherObject != null) rocketLauncherObject.SetActive(true);
+                    break;
             }
             
-            UpdateUI();
-            onWeaponChanged?.Invoke();
-        }
-    }
-
-    public IWeapon GetCurrentWeapon()
-    {
-        if (currentWeaponIndex >= 0 && currentWeaponIndex < weapons.Count)
-        {
-            return weapons[currentWeaponIndex];
-        }
-        return null;
-    }
-
-    public void SelectWeapon(int index)
-    {
-        if (index >= 0 && index < weapons.Count && index != currentWeaponIndex)
-        {
-            if (currentWeaponIndex >= 0 && currentWeaponIndex < weapons.Count)
-            {
-                DisableWeapon(weapons[currentWeaponIndex]);
-            }
+            activeWeaponIndex = slotIndex;
+            Debug.Log($"Switched to weapon {slotIndex}");
             
-            currentWeaponIndex = index;
-            
-            EnableWeapon(weapons[currentWeaponIndex]);
-            
-            UpdateUI();
+            // Notify any listeners
+            OnWeaponChanged?.Invoke(activeWeaponIndex);
         }
-    }
-
-    public void SelectNextWeapon()
-    {
-        if (weapons.Count > 0)
+        else
         {
-            int nextIndex = (currentWeaponIndex + 1) % weapons.Count;
-            SelectWeapon(nextIndex);
+            Debug.Log($"Cannot switch to weapon {slotIndex} - not unlocked or invalid index");
         }
     }
-
-    public void SelectPreviousWeapon()
+    
+    private void DisableAllWeapons()
     {
-        if (weapons.Count > 0)
-        {
-            int prevIndex = (currentWeaponIndex - 1 + weapons.Count) % weapons.Count;
-            SelectWeapon(prevIndex);
-        }
+        if (katanaObject != null) katanaObject.SetActive(false);
+        if (glockObject != null) glockObject.SetActive(false);
+        if (smgObject != null) smgObject.SetActive(false);
+        if (rocketLauncherObject != null) rocketLauncherObject.SetActive(false);
     }
-
-    private void EnableWeapon(IWeapon weapon)
+    
+    // Helper methods for UI or other systems
+    public bool IsWeaponUnlocked(int slotIndex)
     {
-        MonoBehaviour weaponMono = weapon as MonoBehaviour;
-        if (weaponMono != null)
-        {
-            weaponMono.gameObject.SetActive(true);
-        }
+        if (slotIndex >= 0 && slotIndex < weaponUnlocked.Length)
+            return weaponUnlocked[slotIndex];
+        return false;
     }
-
-    private void DisableWeapon(IWeapon weapon)
+    
+    public int GetActiveWeaponIndex()
     {
-        MonoBehaviour weaponMono = weapon as MonoBehaviour;
-        if (weaponMono != null)
-        {
-            weaponMono.gameObject.SetActive(false);
-        }
-    }
-
-    private void UpdateUI()
-    {
-        if (weaponUIParent != null)
-        {
-            foreach (Transform child in weaponUIParent)
-            {
-                Destroy(child.gameObject);
-            }
-            
-            for (int i = 0; i < weapons.Count; i++)
-            {
-                GameObject uiElement = Instantiate(weaponUIElementPrefab, weaponUIParent);
-                WeaponUIElement element = uiElement.GetComponent<WeaponUIElement>();
-                
-                if (element != null)
-                {
-                    element.SetWeapon(weapons[i], i == currentWeaponIndex);
-                }
-            }
-        }
-    }
-
-    public void PickUpWeapon(IWeapon weapon)
-    {
-        AddWeapon(weapon);
-        Debug.Log($"Picked up: {weapon.GetType().Name}");
+        return activeWeaponIndex;
     }
 }
