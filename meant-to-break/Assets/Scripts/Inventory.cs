@@ -10,8 +10,6 @@ public class Inventory : MonoBehaviour
     [SerializeField] private GameObject smgObject;     // Slot 2
     [SerializeField] private GameObject rocketLauncherObject; // Slot 3
     
-    [SerializeField] private GameObject inventoryUI;
-    
     private bool[] weaponUnlocked = new bool[4]; // Array to track unlocked weapons
     private int activeWeaponIndex = -1; // Currently active weapon (-1 means no weapon active)
     
@@ -22,6 +20,10 @@ public class Inventory : MonoBehaviour
     {
         // Make sure all weapons are disabled at start
         DisableAllWeapons();
+        
+        // Initialize first weapon as unlocked
+        weaponUnlocked[0] = true;
+        SwitchToWeapon(0);
     }
 
     private void Update()
@@ -32,68 +34,7 @@ public class Inventory : MonoBehaviour
         else if (Input.GetKeyDown(KeyCode.Alpha3)) SwitchToWeapon(2);
         else if (Input.GetKeyDown(KeyCode.Alpha4)) SwitchToWeapon(3);
         
-        // Optional: Toggle inventory UI
-        if (Input.GetKeyDown(KeyCode.Tab))
-            inventoryUI.SetActive(!inventoryUI.activeSelf);
-    }
-
-    // Called from WeaponPickup when a weapon is picked up
-    public void UnlockWeapon(int slotIndex)
-    {
-        if (slotIndex < 0 || slotIndex >= weaponUnlocked.Length)
-        {
-            Debug.LogError("Invalid weapon slot: " + slotIndex);
-            return;
-        }
-        
-        weaponUnlocked[slotIndex] = true;
-        Debug.Log($"Weapon in slot {slotIndex} unlocked!");
-        
-        // If this is our first weapon, automatically equip it
-        if (activeWeaponIndex == -1)
-        {
-            SwitchToWeapon(slotIndex);
-        }
-        
-        // Notify any listeners (like UI elements)
-        OnWeaponChanged?.Invoke(activeWeaponIndex);
-    }
-    
-    public void SwitchToWeapon(int slotIndex)
-    {
-        // Check if the weapon is unlocked
-        if (slotIndex >= 0 && slotIndex < weaponUnlocked.Length && weaponUnlocked[slotIndex])
-        {
-            // First disable all weapons
-            DisableAllWeapons();
-            
-            // Then activate the requested weapon
-            switch (slotIndex)
-            {
-                case 0: // Katana
-                    if (katanaObject != null) katanaObject.SetActive(true);
-                    break;
-                case 1: // Glock
-                    if (glockObject != null) glockObject.SetActive(true);
-                    break;
-                case 2: // SMG
-                    if (smgObject != null) smgObject.SetActive(true);
-                    break;
-                case 3: // Rocket Launcher
-                    if (rocketLauncherObject != null) rocketLauncherObject.SetActive(true);
-                    break;
-            }
-            
-            activeWeaponIndex = slotIndex;
-            Debug.Log($"Switched to weapon {slotIndex}");
-            
-            // Notify any listeners
-            OnWeaponChanged?.Invoke(activeWeaponIndex);
-        }
-        else
-        {
-            Debug.Log($"Cannot switch to weapon {slotIndex} - not unlocked or invalid index");
-        }
+        // Tab key handling is now done in the InventoryUI script
     }
     
     private void DisableAllWeapons()
@@ -102,6 +43,55 @@ public class Inventory : MonoBehaviour
         if (glockObject != null) glockObject.SetActive(false);
         if (smgObject != null) smgObject.SetActive(false);
         if (rocketLauncherObject != null) rocketLauncherObject.SetActive(false);
+    }
+    
+    public void SwitchToWeapon(int slotIndex)
+    {
+        // Check if weapon is unlocked
+        if (slotIndex < 0 || slotIndex >= weaponUnlocked.Length || !weaponUnlocked[slotIndex])
+            return;
+            
+        // If it's already active, don't switch
+        if (activeWeaponIndex == slotIndex)
+            return;
+            
+        // Disable currently active weapon
+        DisableAllWeapons();
+        
+        // Enable new weapon
+        switch(slotIndex)
+        {
+            case 0:
+                if (katanaObject != null) katanaObject.SetActive(true);
+                break;
+            case 1:
+                if (glockObject != null) glockObject.SetActive(true);
+                break;
+            case 2:
+                if (smgObject != null) smgObject.SetActive(true);
+                break;
+            case 3:
+                if (rocketLauncherObject != null) rocketLauncherObject.SetActive(true);
+                break;
+        }
+        
+        // Set new active weapon
+        activeWeaponIndex = slotIndex;
+        
+        // Notify listeners
+        OnWeaponChanged?.Invoke(activeWeaponIndex);
+    }
+    
+    public void UnlockWeapon(int slotIndex)
+    {
+        if (slotIndex < 0 || slotIndex >= weaponUnlocked.Length)
+            return;
+            
+        weaponUnlocked[slotIndex] = true;
+        
+        // If no weapon is active, auto-switch to this one
+        if (activeWeaponIndex == -1)
+            SwitchToWeapon(slotIndex);
     }
     
     // Helper methods for UI or other systems

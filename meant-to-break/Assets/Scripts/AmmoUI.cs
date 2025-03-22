@@ -13,6 +13,7 @@ public class AmmoUI : MonoBehaviour
     private GameObject playerObject;
     private Inventory playerInventory;
     private Glock glockWeapon;
+    private SMG smgWeapon;
     
     void Start()
     {
@@ -42,10 +43,14 @@ public class AmmoUI : MonoBehaviour
         
         int activeWeapon = playerInventory.GetActiveWeaponIndex();
         
-        // Only show ammo UI for weapons that use ammo (currently just Glock)
+        // Only show ammo UI for weapons that use ammo
         if (activeWeapon == 1) // Glock
         {
             UpdateGlockUI();
+        }
+        else if (activeWeapon == 2) // SMG
+        {
+            UpdateSMGUI();
         }
         else
         {
@@ -84,6 +89,47 @@ public class AmmoUI : MonoBehaviour
         {
             UpdateReloadDisplay(true, glockWeapon.GetReloadTimeRemaining());
         }
+        else
+        {
+            UpdateReloadDisplay(false, 0);
+        }
+    }
+    
+    private void UpdateSMGUI()
+    {
+        // Find the SMG if we don't have it yet
+        if (smgWeapon == null)
+        {
+            smgWeapon = FindWeaponComponent<SMG>();
+            
+            if (smgWeapon != null)
+            {
+                // Subscribe to events
+                smgWeapon.OnAmmoChanged += UpdateAmmoDisplay;
+                smgWeapon.OnReloadStateChanged += UpdateReloadDisplay;
+            }
+            else
+            {
+                return;
+            }
+        }
+        
+        // Show ammo panel
+        if (ammoPanel != null)
+            ammoPanel.SetActive(true);
+        
+        // Update ammo display
+        UpdateAmmoDisplay(smgWeapon.GetCurrentAmmo(), smgWeapon.GetMaxAmmo());
+        
+        // Update reload display
+        if (smgWeapon.IsReloading())
+        {
+            UpdateReloadDisplay(true, smgWeapon.GetReloadTimeRemaining());
+        }
+        else
+        {
+            UpdateReloadDisplay(false, 0);
+        }
     }
     
     private void UpdateAmmoDisplay(int current, int max)
@@ -102,7 +148,22 @@ public class AmmoUI : MonoBehaviour
             
             if (isReloading)
             {
-                float progress = 1 - (timeRemaining / glockWeapon.GetReloadTotalTime());
+                // Use the appropriate weapon for reload time calculation
+                float totalReloadTime;
+                if (glockWeapon != null && glockWeapon.IsReloading())
+                {
+                    totalReloadTime = glockWeapon.GetReloadTotalTime();
+                }
+                else if (smgWeapon != null && smgWeapon.IsReloading())
+                {
+                    totalReloadTime = smgWeapon.GetReloadTotalTime();
+                }
+                else
+                {
+                    totalReloadTime = 1.0f; // Fallback
+                }
+                
+                float progress = 1 - (timeRemaining / totalReloadTime);
                 reloadProgressBar.value = progress;
             }
         }
@@ -139,10 +200,18 @@ public class AmmoUI : MonoBehaviour
     // Cleanup when destroying
     void OnDestroy()
     {
+        // Unsubscribe from Glock events
         if (glockWeapon != null)
         {
             glockWeapon.OnAmmoChanged -= UpdateAmmoDisplay;
             glockWeapon.OnReloadStateChanged -= UpdateReloadDisplay;
+        }
+        
+        // Unsubscribe from SMG events
+        if (smgWeapon != null)
+        {
+            smgWeapon.OnAmmoChanged -= UpdateAmmoDisplay;
+            smgWeapon.OnReloadStateChanged -= UpdateReloadDisplay;
         }
     }
 }

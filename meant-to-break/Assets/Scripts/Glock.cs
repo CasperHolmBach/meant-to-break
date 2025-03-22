@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class Glock : MonoBehaviour, IWeapon
@@ -10,32 +11,36 @@ public class Glock : MonoBehaviour, IWeapon
     public float bulletDamage = 20f;
     
     [Header("Visual Effects")]
-    [SerializeField] private Transform muzzlePoint; // Reference to the tip of the gun where effects spawn
-    [SerializeField] private GameObject muzzleFlashPrefab; // Muzzle flash effect prefab
-    [SerializeField] private float muzzleFlashDuration = 0.05f; // How long the muzzle flash stays visible
-    [SerializeField] private Light muzzleLight; // Optional point light for flash effect
-    [SerializeField] private float muzzleLightIntensity = 2f; // Light intensity at flash
-    [SerializeField] private float muzzleLightDuration = 0.05f; // How long the light stays on
+    [SerializeField] private Transform muzzlePoint; 
+    [SerializeField] private GameObject muzzleFlashPrefab; 
+    [SerializeField] private float muzzleFlashDuration = 0.05f;
+    [SerializeField] private Light muzzleLight;
+    [SerializeField] private float muzzleLightIntensity = 2f; 
+    [SerializeField] private float muzzleLightDuration = 0.05f; 
     
     [Header("Ammo Settings")]
     [SerializeField] private int maxAmmo = 18;
     [SerializeField] private int currentAmmo = 18;
-    [SerializeField] private float fireRate = 0.3f; // Time between shots in seconds
-    [SerializeField] private float reloadTime = 1.5f; // Time to reload in seconds
+    [SerializeField] private float fireRate = 0.3f; 
+    [SerializeField] private float reloadTime = 1.5f;
     
     private float nextFireTime = 0f;
     private bool isReloading = false;
     private float reloadFinishTime = 0f;
     private GameObject activeMuzzleFlash = null;
     
+    // Track active coroutines
+    private Coroutine reloadCoroutine;
+    private Coroutine muzzleLightCoroutine;
+    
     // Audio
     [Header("Audio")]
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private AudioClip reloadSound;
     [SerializeField] private AudioClip emptySound;
-    [SerializeField] private float shootVolume = 0.25f; // 50% volume for shooting
-    [SerializeField] private float reloadVolume = 1.0f; // Default volume for reload
-    [SerializeField] private float emptyVolume = 1.0f; // Default volume for empty sound
+    [SerializeField] private float shootVolume = 0.25f;
+    [SerializeField] private float reloadVolume = 1.0f;
+    [SerializeField] private float emptyVolume = 1.0f;
     private AudioSource audioSource;
     
     // Events
@@ -62,12 +67,89 @@ public class Glock : MonoBehaviour, IWeapon
         }
             
         // Notify UI of initial ammo state
-        if (OnAmmoChanged != null)
-            OnAmmoChanged(currentAmmo, maxAmmo);
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+    }
+    
+    private void OnEnable()
+    {
+        // Reset weapon state when enabled
+        nextFireTime = 0f; 
+        
+        // Cancel any existing reload
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+        
+        // Cancel any muzzle light effect
+        if (muzzleLightCoroutine != null)
+        {
+            StopCoroutine(muzzleLightCoroutine);
+            muzzleLightCoroutine = null;
+        }
+        
+        // Make sure muzzle light is off
+        if (muzzleLight != null)
+        {
+            muzzleLight.enabled = false;
+        }
+        
+        // Clean up any existing muzzle flash
+        if (activeMuzzleFlash != null)
+        {
+            Destroy(activeMuzzleFlash);
+            activeMuzzleFlash = null;
+        }
+        
+        // Reset reload state
+        if (isReloading)
+        {
+            isReloading = false;
+            OnReloadStateChanged?.Invoke(false, 0);
+        }
+        
+        // Refresh UI
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+        
+        Debug.Log("Glock enabled and reset");
+    }
+    
+    private void OnDisable()
+    {
+        // Stop coroutines
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+            reloadCoroutine = null;
+        }
+        
+        if (muzzleLightCoroutine != null)
+        {
+            StopCoroutine(muzzleLightCoroutine);
+            muzzleLightCoroutine = null;
+        }
+        
+        // Clean up effects
+        if (activeMuzzleFlash != null)
+        {
+            Destroy(activeMuzzleFlash);
+            activeMuzzleFlash = null;
+        }
+        
+        if (muzzleLight != null)
+        {
+            muzzleLight.enabled = false;
+        }
+        
+        Debug.Log("Glock disabled and cleanup performed");
     }
 
     void Update()
     {
+        // Only process if active
+        if (!gameObject.activeInHierarchy) return;
+        
         // Handle firing with left mouse button
         if (Input.GetMouseButton(0) && !isReloading)
         {
@@ -78,12 +160,6 @@ public class Glock : MonoBehaviour, IWeapon
         if (Input.GetKeyDown(KeyCode.R) && !isReloading && currentAmmo < maxAmmo)
         {
             StartReload();
-        }
-        
-        // Check if reload is complete
-        if (isReloading && Time.time >= reloadFinishTime)
-        {
-            FinishReload();
         }
         
         // Update reload progress
@@ -183,8 +259,7 @@ public class Glock : MonoBehaviour, IWeapon
         currentAmmo--;
         
         // Update UI
-        if (OnAmmoChanged != null)
-            OnAmmoChanged(currentAmmo, maxAmmo);
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
         
         // Set next fire time
         nextFireTime = Time.time + fireRate;
@@ -210,11 +285,18 @@ public class Glock : MonoBehaviour, IWeapon
         // Light flash effect
         if (muzzleLight != null)
         {
-            StartCoroutine(FlashMuzzleLight());
+            // Cancel existing coroutine if any
+            if (muzzleLightCoroutine != null)
+            {
+                StopCoroutine(muzzleLightCoroutine);
+            }
+            
+            // Start new coroutine
+            muzzleLightCoroutine = StartCoroutine(FlashMuzzleLight());
         }
     }
     
-    private System.Collections.IEnumerator FlashMuzzleLight()
+    private IEnumerator FlashMuzzleLight()
     {
         // Store initial light settings
         float originalIntensity = muzzleLight.intensity;
@@ -227,15 +309,33 @@ public class Glock : MonoBehaviour, IWeapon
         // Wait for duration
         yield return new WaitForSeconds(muzzleLightDuration);
         
-        // Restore original settings
-        muzzleLight.intensity = originalIntensity;
-        muzzleLight.enabled = originalEnabled;
+        // Only turn light off if we're still active
+        if (gameObject.activeInHierarchy)
+        {
+            // Restore original settings
+            muzzleLight.intensity = originalIntensity;
+            muzzleLight.enabled = originalEnabled;
+        }
+        
+        muzzleLightCoroutine = null;
     }
     
     private void StartReload()
     {
         if (currentAmmo == maxAmmo) return;
         
+        // Stop any existing reload coroutine
+        if (reloadCoroutine != null)
+        {
+            StopCoroutine(reloadCoroutine);
+        }
+        
+        // Start new reload coroutine
+        reloadCoroutine = StartCoroutine(ReloadRoutine());
+    }
+    
+    private IEnumerator ReloadRoutine()
+    {
         isReloading = true;
         reloadFinishTime = Time.time + reloadTime;
         
@@ -248,8 +348,17 @@ public class Glock : MonoBehaviour, IWeapon
         Debug.Log("Glock: Reloading... (" + reloadTime + "s)");
         
         // Notify UI of reload start
-        if (OnReloadStateChanged != null)
-            OnReloadStateChanged(true, reloadTime);
+        OnReloadStateChanged?.Invoke(true, reloadTime);
+        
+        yield return new WaitForSeconds(reloadTime);
+        
+        // Only complete reload if still active
+        if (gameObject.activeInHierarchy)
+        {
+            FinishReload();
+        }
+        
+        reloadCoroutine = null;
     }
     
     private void FinishReload()
@@ -260,12 +369,10 @@ public class Glock : MonoBehaviour, IWeapon
         Debug.Log("Glock: Reloaded! Ammo: " + currentAmmo + "/" + maxAmmo);
         
         // Update UI
-        if (OnAmmoChanged != null)
-            OnAmmoChanged(currentAmmo, maxAmmo);
-            
+        OnAmmoChanged?.Invoke(currentAmmo, maxAmmo);
+        
         // Notify UI of reload end
-        if (OnReloadStateChanged != null)
-            OnReloadStateChanged(false, 0);
+        OnReloadStateChanged?.Invoke(false, 0);
     }
     
     // Public getters for UI
