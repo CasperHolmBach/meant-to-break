@@ -26,6 +26,15 @@ public class Katana : MonoBehaviour, IWeapon
     [SerializeField] private float windEffectSpeed = 10f;
     [SerializeField] private float windEffectThreshold = 0.3f; // How far into the swing to trigger effect
     
+    [Header("Audio")]
+    [SerializeField] private AudioClip[] slashSounds; // Array of different slash sounds for variety
+    [SerializeField] private AudioClip[] dashSounds; // Array of different dash sounds
+    [SerializeField] private AudioClip dashFailSound; // Sound when dash is on cooldown
+    [SerializeField] private float slashVolume = 0.7f;
+    [SerializeField] private float dashVolume = 1.0f;
+    [SerializeField] private float failVolume = 0.5f;
+    private AudioSource audioSource;
+    
     private bool isAttacking = false;
     private float attackTimer = 0f;
     private Quaternion initialRotation;
@@ -42,6 +51,11 @@ public class Katana : MonoBehaviour, IWeapon
             
         if (playerController == null)
             playerController = FindObjectOfType<FPSController>();
+            
+        // Get or add audio source
+        audioSource = GetComponent<AudioSource>();
+        if (audioSource == null)
+            audioSource = gameObject.AddComponent<AudioSource>();
     }
     
     private void Update()
@@ -56,6 +70,7 @@ public class Katana : MonoBehaviour, IWeapon
         {
             Mouse2();
         }
+        
         if (isAttacking)
         {
             attackTimer += Time.deltaTime;
@@ -96,6 +111,9 @@ public class Katana : MonoBehaviour, IWeapon
             
             // Set the target rotation
             targetRotation = Quaternion.Euler(newRotation);
+            
+            // Play slash sound
+            PlayRandomSlashSound();
         }
     }
 
@@ -115,6 +133,9 @@ public class Katana : MonoBehaviour, IWeapon
                 // Set cooldown
                 nextDashTime = Time.time + dashCooldown;
                 Debug.Log("Katana dash activated!");
+                
+                // Play dash sound
+                PlayRandomDashSound();
             }
             else
             {
@@ -137,6 +158,38 @@ public class Katana : MonoBehaviour, IWeapon
         {
             float remainingTime = nextDashTime - Time.time;
             Debug.Log($"Katana dash on cooldown ({remainingTime:F1}s remaining)");
+            
+            // Play failure sound for cooldown
+            PlayDashFailSound();
+        }
+    }
+    
+    // Play a random slash sound for variety
+    private void PlayRandomSlashSound()
+    {
+        if (audioSource != null && slashSounds != null && slashSounds.Length > 0)
+        {
+            int randomIndex = Random.Range(0, slashSounds.Length);
+            audioSource.PlayOneShot(slashSounds[randomIndex], slashVolume);
+        }
+    }
+    
+    // Play a random dash sound
+    private void PlayRandomDashSound()
+    {
+        if (audioSource != null && dashSounds != null && dashSounds.Length > 0)
+        {
+            int randomIndex = Random.Range(0, dashSounds.Length);
+            audioSource.PlayOneShot(dashSounds[randomIndex], dashVolume);
+        }
+    }
+    
+    // Play the dash cooldown/fail sound
+    private void PlayDashFailSound()
+    {
+        if (audioSource != null && dashFailSound != null)
+        {
+            audioSource.PlayOneShot(dashFailSound, failVolume);
         }
     }
     

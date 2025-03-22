@@ -151,3 +151,6 @@ MonoBehaviour:
   baseKnockbackForce: 10
   maxKnockbackDistance: 15
   minKnockbackDistance: 0
+  flyingSound: {fileID: 0}
+  explosionSound: {fileID: 8300000, guid: efc38b5f4095e854fa03e31b74a974ba, type: 3}
+  explosionVolume: 0.5

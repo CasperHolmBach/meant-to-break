@@ -683,11 +683,11 @@ PlayerSettings:
   m_MobileRenderingPath: 1
   metroPackageName: meant-to-break
   metroPackageVersion: 
-  metroCertificatePath: 
+  metroCertificatePath: Assets/WSATestCertificate.pfx
   metroCertificatePassword: 
-  metroCertificateSubject: 
-  metroCertificateIssuer: 
-  metroCertificateNotAfter: 0000000000000000
+  metroCertificateSubject: DefaultCompany
+  metroCertificateIssuer: DefaultCompany
+  metroCertificateNotAfter: 0087cae23cbadc01
   metroApplicationDescription: meant-to-break
   wsaImages: {}
   metroTileShortName: 

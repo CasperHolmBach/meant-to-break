@@ -9,6 +9,14 @@ public class Glock : MonoBehaviour, IWeapon
     public float bulletSpeed = 50f;
     public float bulletDamage = 20f;
     
+    [Header("Visual Effects")]
+    [SerializeField] private Transform muzzlePoint; // Reference to the tip of the gun where effects spawn
+    [SerializeField] private GameObject muzzleFlashPrefab; // Muzzle flash effect prefab
+    [SerializeField] private float muzzleFlashDuration = 0.05f; // How long the muzzle flash stays visible
+    [SerializeField] private Light muzzleLight; // Optional point light for flash effect
+    [SerializeField] private float muzzleLightIntensity = 2f; // Light intensity at flash
+    [SerializeField] private float muzzleLightDuration = 0.05f; // How long the light stays on
+    
     [Header("Ammo Settings")]
     [SerializeField] private int maxAmmo = 18;
     [SerializeField] private int currentAmmo = 18;
@@ -18,12 +26,16 @@ public class Glock : MonoBehaviour, IWeapon
     private float nextFireTime = 0f;
     private bool isReloading = false;
     private float reloadFinishTime = 0f;
+    private GameObject activeMuzzleFlash = null;
     
     // Audio
     [Header("Audio")]
     [SerializeField] private AudioClip shootSound;
     [SerializeField] private AudioClip reloadSound;
     [SerializeField] private AudioClip emptySound;
+    [SerializeField] private float shootVolume = 0.25f; // 50% volume for shooting
+    [SerializeField] private float reloadVolume = 1.0f; // Default volume for reload
+    [SerializeField] private float emptyVolume = 1.0f; // Default volume for empty sound
     private AudioSource audioSource;
     
     // Events
@@ -42,6 +54,12 @@ public class Glock : MonoBehaviour, IWeapon
         audioSource = GetComponent<AudioSource>();
         if (audioSource == null)
             audioSource = gameObject.AddComponent<AudioSource>();
+        
+        // Make sure muzzle light is off initially
+        if (muzzleLight != null)
+        {
+            muzzleLight.enabled = false;
+        }
             
         // Notify UI of initial ammo state
         if (OnAmmoChanged != null)
@@ -87,10 +105,10 @@ public class Glock : MonoBehaviour, IWeapon
             }
             else
             {
-                // Out of ammo sound
+                // Out of ammo sound at normal volume
                 if (emptySound != null && audioSource != null)
                 {
-                    audioSource.PlayOneShot(emptySound);
+                    audioSource.PlayOneShot(emptySound, emptyVolume);
                 }
                 Debug.Log("Glock: Out of ammo! Press R to reload.");
                 
@@ -122,8 +140,23 @@ public class Glock : MonoBehaviour, IWeapon
             targetPoint = ray.origin + ray.direction * fireDistance;
         }
         
-        // Instantiate bullet at gun muzzle position
-        Vector3 muzzlePosition = playerCamera.transform.position + playerCamera.transform.forward * 0.5f;
+        // Determine muzzle position
+        Vector3 muzzlePosition;
+        if (muzzlePoint != null)
+        {
+            // Use defined muzzle point if available
+            muzzlePosition = muzzlePoint.position;
+        }
+        else
+        {
+            // Fallback to camera position + offset
+            muzzlePosition = playerCamera.transform.position + playerCamera.transform.forward * 0.5f;
+        }
+        
+        // Create muzzle flash effect
+        CreateMuzzleFlash();
+        
+        // Instantiate bullet
         GameObject bullet = Instantiate(bulletPrefab, muzzlePosition, Quaternion.identity);
         
         // Set bullet direction
@@ -140,10 +173,10 @@ public class Glock : MonoBehaviour, IWeapon
         bulletScript.speed = bulletSpeed;
         bulletScript.damage = bulletDamage;
         
-        // Play sound
+        // Play sound at 50% volume
         if (shootSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(shootSound);
+            audioSource.PlayOneShot(shootSound, shootVolume);
         }
         
         // Reduce ammo
@@ -157,6 +190,48 @@ public class Glock : MonoBehaviour, IWeapon
         nextFireTime = Time.time + fireRate;
     }
     
+    private void CreateMuzzleFlash()
+    {
+        if (muzzleFlashPrefab != null && muzzlePoint != null)
+        {
+            // Clean up any existing muzzle flash
+            if (activeMuzzleFlash != null)
+            {
+                Destroy(activeMuzzleFlash);
+            }
+            
+            // Create new muzzle flash
+            activeMuzzleFlash = Instantiate(muzzleFlashPrefab, muzzlePoint.position, muzzlePoint.rotation, muzzlePoint);
+            
+            // Destroy after duration
+            Destroy(activeMuzzleFlash, muzzleFlashDuration);
+        }
+        
+        // Light flash effect
+        if (muzzleLight != null)
+        {
+            StartCoroutine(FlashMuzzleLight());
+        }
+    }
+    
+    private System.Collections.IEnumerator FlashMuzzleLight()
+    {
+        // Store initial light settings
+        float originalIntensity = muzzleLight.intensity;
+        bool originalEnabled = muzzleLight.enabled;
+        
+        // Turn on light with flash intensity
+        muzzleLight.intensity = muzzleLightIntensity;
+        muzzleLight.enabled = true;
+        
+        // Wait for duration
+        yield return new WaitForSeconds(muzzleLightDuration);
+        
+        // Restore original settings
+        muzzleLight.intensity = originalIntensity;
+        muzzleLight.enabled = originalEnabled;
+    }
+    
     private void StartReload()
     {
         if (currentAmmo == maxAmmo) return;
@@ -164,10 +239,10 @@ public class Glock : MonoBehaviour, IWeapon
         isReloading = true;
         reloadFinishTime = Time.time + reloadTime;
         
-        // Play reload sound
+        // Play reload sound at normal volume
         if (reloadSound != null && audioSource != null)
         {
-            audioSource.PlayOneShot(reloadSound);
+            audioSource.PlayOneShot(reloadSound, reloadVolume);
         }
         
         Debug.Log("Glock: Reloading... (" + reloadTime + "s)");
