@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 8823859219258968583}
   - component: {fileID: 3970295431074760895}
   - component: {fileID: 7571411156957142466}
+  - component: {fileID: 7751687304596569193}
   m_Layer: 0
   m_Name: Zombie
   m_TagString: Untagged
@@ -145,7 +146,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   agent: {fileID: 8823859219258968583}
-  cam: {fileID: 0}
+  destination: {x: 0, y: 0, z: 0}
+  health: 100
+  attackCollider: {fileID: 7751687304596569193}
 --- !u!54 &7571411156957142466
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -173,3 +176,24 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 80
   m_CollisionDetection: 0
+--- !u!65 &7751687304596569193
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 22319285604992698}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.6074097, y: 0.5592544, z: 0.4908204}
+  m_Center: {x: -0.004697144, y: 0.20228207, z: 0.7428181}

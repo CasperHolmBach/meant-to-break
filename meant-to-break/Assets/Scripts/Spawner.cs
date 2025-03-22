@@ -12,19 +12,27 @@ using Vector3 = UnityEngine.Vector3;
 public class Spawner : MonoBehaviour
 {
     private Timer _timer;
+    private int _overlapCount;
     
     public Transform[] destinations;
     public GameObject zombiePrefab;
+    public Collider clerance;
     public float interval;
+
+    private bool IsOverlapping {
+        get {
+            return _overlapCount > 0;
+        }
+    }
     
-    void Start()
+    public void Start()
     {
-        InvokeRepeating("SpawnZombie", interval, interval);
+        InvokeRepeating(nameof(SpawnZombie), interval, interval);
     }
 
-    void SpawnZombie()
+    public void SpawnZombie()
     {
-        if (!CheckClerance())
+        if (IsOverlapping)
         {
             return;
         }
@@ -36,15 +44,12 @@ public class Spawner : MonoBehaviour
         zombie.GetComponent<ZombieController>().destination = destination.position;
     }
 
-    bool CheckClerance()
-    {
-        Vector3 rayOrigin = new Vector3(transform.position.x, transform.position.y + 1f, transform.position.z);
-        
-        if (Physics.Raycast(rayOrigin, transform.TransformDirection(Vector3.up), 10))
-        {
-            return false;
-        }
-        return true;
+    public void OnTriggerEnter(Collider other) {
+        _overlapCount++;
+    }
+
+    public void OnTriggerExit(Collider other) {
+        _overlapCount--;
     }
     
 }
