@@ -148,4 +148,9 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   speed: 20
   explosionEffect: {fileID: 417761080263594739, guid: 3ff01ca0770b549d4bb2ec8c172d1cfe, type: 3}
-  baseKnockbackForce: 35
+  baseKnockbackForce: 10
+  maxKnockbackDistance: 15
+  minKnockbackDistance: 0
+  flyingSound: {fileID: 0}
+  explosionSound: {fileID: 8300000, guid: efc38b5f4095e854fa03e31b74a974ba, type: 3}
+  explosionVolume: 0.5
