@@ -41,7 +41,7 @@ public class Spawner : MonoBehaviour
         
         Transform destination = destinations[Random.Range(0, destinations.Length)];
         GameObject zombie = Instantiate(zombiePrefab, spawnPosition, spawnRotation);
-        zombie.GetComponent<ZombieController>().destination = destination.position;
+        zombie.GetComponent<ZombieController>().destination = destination;
     }
 
     public void OnTriggerEnter(Collider other) {

@@ -6,7 +6,7 @@ using UnityEngine.AI;
 public class ZombieController : MonoBehaviour
 {
     public NavMeshAgent agent;
-    public Vector3 destination;
+    public Transform destination;
     public BoxCollider attackCollider;
     
     public int health = 100;
@@ -15,7 +15,7 @@ public class ZombieController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        agent.SetDestination(destination);
+        agent.SetDestination(destination.position);
     }
 
     void OnTriggerEnter(Collider other) {
