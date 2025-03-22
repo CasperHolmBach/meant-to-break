@@ -25,7 +25,7 @@ Transform:
   m_GameObject: {fileID: 3348943991715098586}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.13, y: 0, z: 0.522}
+  m_LocalPosition: {x: 0.177, y: -1, z: -0.592}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -259,7 +259,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9f51359ca3c384ee8b3dccfccca92aaf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  rocketPrefab: {fileID: 6506334686736003798, guid: 968f42685e7fa4ba6bc1aa8caa9c5431, type: 3}
+  rocketPrefab: {fileID: 52036253972496272, guid: 68e2501dd00b48b419d648f989b97f01, type: 3}
   playerCamera: {fileID: 0}
   fireDistance: 100
 --- !u!114 &-9117224432547700378
@@ -275,3 +275,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   weaponPrefab: {fileID: 0}
+  weaponModelOnPlayer: {fileID: 0}
