@@ -14480,7 +14480,10 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7825393282402317390, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1651101314}
   m_SourcePrefab: {fileID: 100100000, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
 --- !u!1001 &837520923
 PrefabInstance:
@@ -15758,6 +15761,10 @@ PrefabInstance:
     - target: {fileID: 1328856857718042232, guid: bd405e22918d199428fc2d85c6afb352, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 5989189850448875231, guid: bd405e22918d199428fc2d85c6afb352, type: 3}
+      propertyPath: availableItems.Array.data[0].price
+      value: 10
       objectReference: {fileID: 0}
     - target: {fileID: 5989189850448875231, guid: bd405e22918d199428fc2d85c6afb352, type: 3}
       propertyPath: availableItems.Array.data[0].itemPrefab
@@ -30061,6 +30068,30 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 3230122162222250202, guid: b2ee4e79b7591da4daa5e1ce55e11ceb, type: 3}
   m_PrefabInstance: {fileID: 1650315046}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1651101306 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7825393282402317390, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+  m_PrefabInstance: {fileID: 835368778}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1651101314
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1651101306}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e6e3a0aeaeefa4042894f6e848267c64, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  zombieCountText: {fileID: 0}
+  createUIAutomatically: 1
+  textColor: {r: 0.8, g: 0.2, b: 0.2, a: 1}
+  fontSize: 16
+  enemyTag: Enemy
+  updateInterval: 0.5
+  fadeSpeed: 2
 --- !u!1001 &1654516911
 PrefabInstance:
   m_ObjectHideFlags: 0

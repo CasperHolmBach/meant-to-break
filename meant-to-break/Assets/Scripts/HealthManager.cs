@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 
 public class HealthManager : MonoBehaviour
 {
@@ -15,8 +16,22 @@ public class HealthManager : MonoBehaviour
     [SerializeField] private bool createUIAutomatically = true;
     [SerializeField] private bool isPlayerHealth = false; // Whether this is the player's health
     
+    [Header("Game Over Settings")]
+    [SerializeField] private string gameOverSceneName = "GameOver"; // Name of your Game Over scene
+    [SerializeField] private bool useGameOverUI = true; // If true, shows UI instead of loading scene
+    [SerializeField] private GameObject gameOverScreenPrefab; // Optional prefab for Game Over UI
+    [SerializeField] private float deathSlowMoFactor = 0.3f; // Slow motion effect on death
+    [SerializeField] private float deathTransitionTime = 1.5f; // Time before showing Game Over
+    
+    private static bool gameOverActive = false; // Prevents multiple Game Over screens
+    private GameObject gameOverInstance;
+    
     void Start()
     {
+        // Reset static flag on game start
+        if (gameObject.CompareTag("Player"))
+            gameOverActive = false;
+            
         // Set default current health if not set
         if (currentHealth <= 0)
             currentHealth = maxHealth;
@@ -34,14 +49,15 @@ public class HealthManager : MonoBehaviour
     
     void Update()
     {
-        if(currentHealth <= 0)
+        if(currentHealth <= 0 && !gameOverActive)
         {
             // Handle death
             if(gameObject.CompareTag("Player"))
             {
-                // You might want a game over screen instead of destroying the player
-                Debug.Log("Player died!");
-                Destroy(gameObject);
+                // Show Game Over instead of destroying player
+                Debug.Log("Player died! Showing Game Over screen.");
+                StartCoroutine(PlayerDeathSequence());
+                gameOverActive = true;
             }
             else
             {
@@ -49,6 +65,132 @@ public class HealthManager : MonoBehaviour
                 Destroy(gameObject);
             }        
         }
+    }
+    
+    // New coroutine for player death sequence
+    private IEnumerator PlayerDeathSequence()
+    {
+        // Disable player controls - find and disable the player controller
+        MonoBehaviour[] playerScripts = GetComponents<MonoBehaviour>();
+        foreach (MonoBehaviour script in playerScripts)
+        {
+            // Disable all scripts except this one
+            if (script != this)
+                script.enabled = false;
+        }
+        
+        // Optional: Slow motion effect
+        Time.timeScale = deathSlowMoFactor;
+        
+        // Wait for death transition
+        yield return new WaitForSecondsRealtime(deathTransitionTime);
+        
+        // Reset time scale
+        Time.timeScale = 1.0f;
+        
+        // Show Game Over UI or load Game Over scene
+        if (useGameOverUI && gameOverScreenPrefab != null)
+        {
+            ShowGameOverUI();
+        }
+        else
+        {
+            // Load Game Over scene
+            SceneManager.LoadScene(gameOverSceneName);
+        }
+    }
+    
+    private void ShowGameOverUI()
+    {
+        // Find or create a canvas for the Game Over UI
+        Canvas canvas = FindObjectOfType<Canvas>();
+        if (canvas == null)
+        {
+            GameObject canvasObj = new GameObject("UICanvas");
+            canvas = canvasObj.AddComponent<Canvas>();
+            canvas.renderMode = RenderMode.ScreenSpaceOverlay;
+            canvasObj.AddComponent<CanvasScaler>();
+            canvasObj.AddComponent<GraphicRaycaster>();
+            
+            // Make sure it survives scene changes if needed
+            DontDestroyOnLoad(canvasObj);
+        }
+        
+        // Instantiate the Game Over screen
+        if (gameOverScreenPrefab != null)
+        {
+            gameOverInstance = Instantiate(gameOverScreenPrefab, canvas.transform);
+        }
+        else
+        {
+            // Create a simple Game Over screen if no prefab is provided
+            CreateSimpleGameOverUI(canvas.transform);
+        }
+    }
+    
+    // Creates a basic Game Over UI if no prefab is provided
+    private void CreateSimpleGameOverUI(Transform canvasTransform)
+    {
+        // Create a panel for the Game Over screen
+        GameObject panel = new GameObject("GameOverPanel");
+        panel.transform.SetParent(canvasTransform, false);
+        panel.AddComponent<RectTransform>().anchorMin = Vector2.zero;
+        panel.GetComponent<RectTransform>().anchorMax = Vector2.one;
+        panel.GetComponent<RectTransform>().sizeDelta = Vector2.zero;
+        
+        // Add a black background
+        Image panelImage = panel.AddComponent<Image>();
+        panelImage.color = new Color(0, 0, 0, 0.8f);
+        
+        // Add Game Over text
+        GameObject textObj = new GameObject("GameOverText");
+        textObj.transform.SetParent(panel.transform, false);
+        
+        TextMeshProUGUI gameOverText = textObj.AddComponent<TextMeshProUGUI>();
+        gameOverText.text = "GAME OVER";
+        gameOverText.fontSize = 72;
+        gameOverText.color = Color.red;
+        gameOverText.alignment = TextAlignmentOptions.Center;
+        
+        RectTransform textRect = textObj.GetComponent<RectTransform>();
+        textRect.anchorMin = new Vector2(0.5f, 0.6f);
+        textRect.anchorMax = new Vector2(0.5f, 0.8f);
+        textRect.sizeDelta = new Vector2(600, 100);
+        textRect.anchoredPosition = Vector2.zero;
+        
+        // Add a Restart button
+        GameObject buttonObj = new GameObject("RestartButton");
+        buttonObj.transform.SetParent(panel.transform, false);
+        
+        RectTransform buttonRect = buttonObj.AddComponent<RectTransform>();
+        buttonRect.anchorMin = new Vector2(0.5f, 0.3f);
+        buttonRect.anchorMax = new Vector2(0.5f, 0.4f);
+        buttonRect.sizeDelta = new Vector2(200, 60);
+        buttonRect.anchoredPosition = Vector2.zero;
+        
+        Image buttonImage = buttonObj.AddComponent<Image>();
+        buttonImage.color = new Color(0.2f, 0.2f, 0.2f, 1f);
+        
+        Button restartButton = buttonObj.AddComponent<Button>();
+        restartButton.targetGraphic = buttonImage;
+        
+        // Add Restart script to the button
+        buttonObj.AddComponent<Restart>();
+        
+        // Add button text
+        GameObject buttonTextObj = new GameObject("RestartText");
+        buttonTextObj.transform.SetParent(buttonObj.transform, false);
+        
+        TextMeshProUGUI buttonText = buttonTextObj.AddComponent<TextMeshProUGUI>();
+        buttonText.text = "RESTART";
+        buttonText.fontSize = 30;
+        buttonText.color = Color.white;
+        buttonText.alignment = TextAlignmentOptions.Center;
+        
+        RectTransform buttonTextRect = buttonTextObj.GetComponent<RectTransform>();
+        buttonTextRect.anchorMin = Vector2.zero;
+        buttonTextRect.anchorMax = Vector2.one;
+        buttonTextRect.sizeDelta = Vector2.zero;
     }
     
     public void Applyhealing(GameObject healingItem, int healing)
