@@ -14594,6 +14594,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 95901732182538825, guid: 7857a808670db9a4dbef9a68e576ebb3, type: 3}
+      propertyPath: m_Enabled
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2386805815959997899, guid: 7857a808670db9a4dbef9a68e576ebb3, type: 3}
       propertyPath: m_Name
       value: SM_Aluminum_Can_01_Opened
@@ -14636,6 +14640,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 2860600461025416508, guid: 7857a808670db9a4dbef9a68e576ebb3, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8820343603218026483, guid: 7857a808670db9a4dbef9a68e576ebb3, type: 3}
+      propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
