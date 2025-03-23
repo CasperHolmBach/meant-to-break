@@ -114,14 +114,36 @@ public class ZombieController : MonoBehaviour
     {
         if (healthManager != null)
         {
+            // Store health before damage for comparison
+            int previousHealth = healthManager.GetCurrentHealth();
+            
+            // Apply damage
             healthManager.TakeDamage(damageAmount);
+            
+            // Find camera direction to position popup better
+            Vector3 cameraDirection = Vector3.zero;
+            if (Camera.main != null)
+            {
+                cameraDirection = (Camera.main.transform.position - transform.position).normalized;
+                // Don't include vertical component
+                cameraDirection.y = 0;
+                cameraDirection.Normalize();
+            }
+            
+            // Position popup higher and slightly toward camera for better visibility
+            Vector3 popupPosition = transform.position + Vector3.up * 2.2f + (cameraDirection * 0.5f);
+            
+            // Create the popup
+            DamagePopup.Create(popupPosition, damageAmount);
+            
             Debug.Log($"Zombie took {damageAmount} damage! Health: {healthManager.GetCurrentHealth()}");
             
-            if (healthManager.GetCurrentHealth() <= 0)
+            // Check if zombie died
+            if (healthManager.GetCurrentHealth() <= 0 && previousHealth > 0)
             {
                 Die();
             }
-    }
+        }
     }
     
     // Legacy method to support older scripts
