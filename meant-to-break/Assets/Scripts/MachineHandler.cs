@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class MachineHandler : MonoBehaviour {
     private bool _startable = false;
@@ -51,6 +52,14 @@ public class MachineHandler : MonoBehaviour {
         if (_currentWave % 2 == 0) {
             destructionList[0].SetActive(false);
             destructionList.RemoveAt(0);
+        }
+        
+        // Check if all waves have been cleared
+        if (destructionList.Count == 0) {
+            _interactable = false;
+            _startable = false;
+            SceneManager.LoadScene("GameWon");
+            return;
         }
         
         // Give player money
