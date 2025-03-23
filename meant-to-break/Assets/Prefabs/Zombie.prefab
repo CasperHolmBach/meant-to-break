@@ -120,7 +120,7 @@ NavMeshAgent:
   m_Enabled: 1
   m_AgentTypeID: 0
   m_Radius: 0.75
-  m_Speed: 3.5
+  m_Speed: 1.5
   m_Acceleration: 25
   avoidancePriority: 50
   m_AngularSpeed: 360
@@ -149,6 +149,8 @@ MonoBehaviour:
   attackCollider: {fileID: 7751687304596569193}
   health: 100
   damage: 10
+  attackCooldown: 1
+  attackRange: 1
 --- !u!65 &7751687304596569193
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -168,5 +170,5 @@ BoxCollider:
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
-  m_Size: {x: 0.6074097, y: 0.5592544, z: 0.4908204}
-  m_Center: {x: -0.004697144, y: 0.20228207, z: 0.7428181}
+  m_Size: {x: 0.6074097, y: 0.5592544, z: 0.3202262}
+  m_Center: {x: -0.004697144, y: 0.20228207, z: 0.657521}

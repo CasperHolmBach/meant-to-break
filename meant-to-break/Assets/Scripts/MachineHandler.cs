@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -6,21 +7,26 @@ public class MachineHandler : MonoBehaviour {
     private bool _startable = false;
     private bool _interactable = true;
     private float _cooldown;
+    private int _currentWave = 1;
     
     public GameObject[] zombieSpawners;
     public List<GameObject> destructionList;
     public TextMeshProUGUI machineControlls;
+    public CurrencyManager currencyManager;
     public float checkingInterval;
+    public int wavePayout;
     
     public void Update() {
         if (Input.GetKeyDown(KeyCode.E) && _startable) {
             Interact();
+            _startable = false;
             _interactable = false;
             _cooldown = checkingInterval;
             machineControlls.enabled = false;
         }
         else if (Input.GetKeyDown(KeyCode.K)) {
-            DestroyCrystal();
+            FinishWave();
+            _currentWave++;
         }
 
         if (!_interactable) {
@@ -28,10 +34,11 @@ public class MachineHandler : MonoBehaviour {
         }
 
         if (_cooldown <= 0 && !_interactable) {
-            GameObject enemy = GameObject.FindWithTag("Enemy");
-            if (enemy == null) {
+            var enemy = GameObject.FindGameObjectsWithTag("Enemy");
+            if (enemy.Length == 0) {
                 _interactable = true;
-                DestroyCrystal();
+                FinishWave();
+                _currentWave++;
             }
             else {
                 _cooldown = checkingInterval;
@@ -39,9 +46,15 @@ public class MachineHandler : MonoBehaviour {
         }
     }
 
-    private void DestroyCrystal() {
-        destructionList[0].SetActive(false);
-        destructionList.RemoveAt(0);
+    private void FinishWave() {
+        // Destroy crystal
+        if (_currentWave % 2 == 0) {
+            destructionList[0].SetActive(false);
+            destructionList.RemoveAt(0);
+        }
+        
+        // Give player money
+        currencyManager.AddMoney((int)(wavePayout * Math.Ceiling((float)_currentWave/2)));
     }
     
     public void OnTriggerEnter(Collider other) {
