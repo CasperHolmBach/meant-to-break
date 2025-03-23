@@ -23,7 +23,6 @@ public class FPSController : MonoBehaviour
     {
         controller = GetComponent<CharacterController>();
 
-        // Lås cursor
         Cursor.lockState = CursorLockMode.Locked;
         Cursor.visible = false;
     }
@@ -46,15 +45,29 @@ public class FPSController : MonoBehaviour
         if (isGrounded && velocity.y < 0)
             velocity.y = -2f;
 
-        // Input
-        float x = Input.GetAxis("Horizontal");
-        float z = Input.GetAxis("Vertical");
+        // Input - Use GetKey instead of GetAxis for keyboard-only movement
+        float x = 0;
+        float z = 0;
+        
+        // Horizontal movement (A/D)
+        if (Input.GetKey(KeyCode.A)) x = -1;
+        else if (Input.GetKey(KeyCode.D)) x = 1;
+        
+        // Vertical movement (W/S)
+        if (Input.GetKey(KeyCode.W)) z = 1;
+        else if (Input.GetKey(KeyCode.S)) z = -1;
 
+        // Calculate movement vector
         Vector3 move = transform.right * x + transform.forward * z;
+        
+        // Normalize if moving diagonally to prevent faster diagonal movement
+        if (move.magnitude > 1)
+            move.Normalize();
+            
         controller.Move(move * moveSpeed * Time.deltaTime);
 
         // Jump
-        if (Input.GetButtonDown("Jump") && isGrounded)
+        if (Input.GetKeyDown(KeyCode.Space) && isGrounded)
             velocity.y = Mathf.Sqrt(jumpHeight * -2f * gravity);
 
         // Apply knockback and decay it over time
