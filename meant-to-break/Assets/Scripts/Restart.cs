@@ -40,6 +40,19 @@ public class Restart : MonoBehaviour
             fadePanel.color = panelColor;
             fadePanel.gameObject.SetActive(true);
         }
+        
+        // Enable the cursor when on the Game Over screen
+        ShowCursor();
+    }
+    
+    // New method to show and unlock cursor
+    public void ShowCursor()
+    {
+        // Make sure the cursor is visible and unlocked
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
+        
+        Debug.Log("Cursor unlocked and made visible");
     }
     
     public void RestartGame()
