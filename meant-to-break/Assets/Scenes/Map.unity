@@ -244,6 +244,14 @@ PrefabInstance:
       propertyPath: waves.Array.data[9]
       value: 10
       objectReference: {fileID: 0}
+    - target: {fileID: 3334815982290890391, guid: 555d06704af386b02b14f935d76e34da, type: 3}
+      propertyPath: destinations.Array.size
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 3334815982290890391, guid: 555d06704af386b02b14f935d76e34da, type: 3}
+      propertyPath: destinations.Array.data[0]
+      value: 
+      objectReference: {fileID: 654726197}
     - target: {fileID: 7291616221825556704, guid: 555d06704af386b02b14f935d76e34da, type: 3}
       propertyPath: m_LocalPosition.x
       value: 8.402
@@ -10972,6 +10980,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 2647809651246084289, guid: 90718f00c89b41545b254a69bb53eb82, type: 3}
   m_PrefabInstance: {fileID: 653484446}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &654726197 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 7198201880145910614, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+  m_PrefabInstance: {fileID: 835368778}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &654805995
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -14421,6 +14434,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 354114319739201482, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+      propertyPath: damage
+      value: 25
+      objectReference: {fileID: 0}
     - target: {fileID: 2519165056690860593, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -14430,12 +14447,20 @@ PrefabInstance:
       value: Player
       objectReference: {fileID: 0}
     - target: {fileID: 3645392049037035393, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+      propertyPath: damage
+      value: 25
+      objectReference: {fileID: 0}
+    - target: {fileID: 3645392049037035393, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
       propertyPath: attackRadius
       value: 3.5
       objectReference: {fileID: 0}
     - target: {fileID: 5287178492341709900, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6683780708834459695, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
+      propertyPath: bulletDamage
+      value: 25
       objectReference: {fileID: 0}
     - target: {fileID: 7198201880145910614, guid: a97546d705374ae46b9a40f2052e9944, type: 3}
       propertyPath: m_LocalPosition.x
@@ -15724,7 +15749,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1328856857718042232, guid: bd405e22918d199428fc2d85c6afb352, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -1.493
+      value: -1.453
       objectReference: {fileID: 0}
     - target: {fileID: 1328856857718042232, guid: bd405e22918d199428fc2d85c6afb352, type: 3}
       propertyPath: m_LocalPosition.y
