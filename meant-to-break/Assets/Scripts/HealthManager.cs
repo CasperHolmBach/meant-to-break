@@ -13,14 +13,22 @@ public class HealthManager : MonoBehaviour
     [SerializeField] private TextMeshProUGUI healthText;
     [SerializeField] private Slider healthBar;
     [SerializeField] private bool createUIAutomatically = true;
+    [SerializeField] private bool isPlayerHealth = false; // Whether this is the player's health
     
     void Start()
     {
-        if (createUIAutomatically && healthText == null)
+        // Set default current health if not set
+        if (currentHealth <= 0)
+            currentHealth = maxHealth;
+        
+        // Only create UI for player health
+        if (createUIAutomatically && healthText == null && 
+            (isPlayerHealth || gameObject.CompareTag("Player")))
         {
             CreateHealthUI();
         }
         
+        // Always update the UI if it exists
         UpdateHealthUI();
     }
     
@@ -28,12 +36,16 @@ public class HealthManager : MonoBehaviour
     {
         if(currentHealth <= 0)
         {
+            // Handle death
             if(gameObject.CompareTag("Player"))
             {
+                // You might want a game over screen instead of destroying the player
+                Debug.Log("Player died!");
                 Destroy(gameObject);
             }
             else
             {
+                // Enemy death
                 Destroy(gameObject);
             }        
         }
@@ -43,7 +55,8 @@ public class HealthManager : MonoBehaviour
     {
         currentHealth = Mathf.Min(currentHealth + healing, maxHealth);
         UpdateHealthUI();
-        Destroy(healingItem);
+        if (healingItem != null)
+            Destroy(healingItem);
     }
     
     public void TakeDamage(int damage)
@@ -54,6 +67,7 @@ public class HealthManager : MonoBehaviour
     
     private void UpdateHealthUI()
     {
+        // Only update UI if it exists (which it will only for the player)
         if (healthText != null)
         {
             healthText.text = $"Health: {currentHealth} / {maxHealth}";
@@ -67,6 +81,13 @@ public class HealthManager : MonoBehaviour
     
     private void CreateHealthUI()
     {
+        // Only create UI for the player
+        if (!isPlayerHealth && !gameObject.CompareTag("Player"))
+        {
+            Debug.Log($"Not creating UI for non-player: {gameObject.name}");
+            return;
+        }
+        
         // Find or create a canvas
         Canvas canvas = FindObjectOfType<Canvas>();
         if (canvas == null)
@@ -78,6 +99,7 @@ public class HealthManager : MonoBehaviour
             canvasObj.AddComponent<GraphicRaycaster>();
         }
         
+        // The rest of the UI creation code remains the same...
         // Create a panel for the health display
         GameObject healthPanel = new GameObject("HealthPanel");
         healthPanel.transform.SetParent(canvas.transform, false);
@@ -111,8 +133,6 @@ public class HealthManager : MonoBehaviour
         textRect.anchorMax = new Vector2(1, 1);
         textRect.sizeDelta = Vector2.zero;
         textRect.anchoredPosition = Vector2.zero;
-        
-
         
         // Create the main slider object
         GameObject sliderObj = new GameObject("HealthBar");
@@ -180,7 +200,7 @@ public class HealthManager : MonoBehaviour
         // Initialize health display
         UpdateHealthUI();
         
-        Debug.Log($"Health UI created with current health: {currentHealth}/{maxHealth} = {(float)currentHealth/maxHealth}");
+        Debug.Log($"Health UI created for player with health: {currentHealth}/{maxHealth}");
     }
     
     public int GetCurrentHealth()

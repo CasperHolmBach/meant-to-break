@@ -102,14 +102,14 @@ public class ShopManager : MonoBehaviour
         if (isShopOpen)
         {
             // Next item
-            if (Input.GetKeyDown(KeyCode.RightArrow) || Input.GetKeyDown(KeyCode.D))
+            if (Input.GetKeyDown(KeyCode.RightArrow))
             {
                 currentItemIndex = (currentItemIndex + 1) % availableItems.Length;
                 UpdateShopPrompt();
             }
             
             // Previous item
-            if (Input.GetKeyDown(KeyCode.LeftArrow) || Input.GetKeyDown(KeyCode.A))
+            if (Input.GetKeyDown(KeyCode.LeftArrow))
             {
                 currentItemIndex = (currentItemIndex - 1 + availableItems.Length) % availableItems.Length;
                 UpdateShopPrompt();
