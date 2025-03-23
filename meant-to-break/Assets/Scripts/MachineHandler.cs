@@ -25,10 +25,6 @@ public class MachineHandler : MonoBehaviour {
             _cooldown = checkingInterval;
             machineControlls.enabled = false;
         }
-        else if (Input.GetKeyDown(KeyCode.K)) {
-            FinishWave();
-            _currentWave++;
-        }
 
         if (!_interactable) {
             _cooldown -= Time.deltaTime;

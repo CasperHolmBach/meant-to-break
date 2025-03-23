@@ -312,7 +312,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Meant to break
+  m_text: Break the Crystal
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
   m_sharedMaterial: {fileID: 2180264, guid: 8f586378b4e144a9851e7b34d9b748ee, type: 2}
@@ -706,10 +706,10 @@ MonoBehaviour:
 
     Jump: SPACE
 
-    Attack: Mouse1
+    Attack: Left Click
 
     Special:
-    Mouse2
+    Right Click
 
     Interact/Pickup: E
 
